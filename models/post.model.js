@@ -17,7 +17,8 @@ const postSchema = new Schema({
     },
     author : {
         type : mongoose.SchemaTypes.ObjectId,
-        ref : "User"
+        ref : "User",
+        required : true
     },
     tags : {
         type : [String],
@@ -26,7 +27,7 @@ const postSchema = new Schema({
     },
     published : {
         type : Boolean,
-        default : false,
+        default : true,
     },
 
 },{
