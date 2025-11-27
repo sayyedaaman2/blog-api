@@ -1,5 +1,6 @@
-import {Schema} from 'mongoose';
+import {model, Schema} from 'mongoose';
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 import {userRoles} from '../utils/contants.js'
 
 
@@ -36,6 +37,24 @@ userSchema.pre('save', async function(){
     this.password = await bcrypt.hash(this.password,10);
 })
 
+userSchema.methods.matchPassword = function(enteredPassword){
+    return bcrypt.compare(enteredPassword, this.password);
+};
 
-const User = mongoose.model("User",userSchema);
+userSchema.methods.generateToken = function(){
+    return jwt.sign(
+        {
+            id : this._id,
+            email : this.email,
+            role : this.role
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn : process.env.JWT_EXPIRES_IN || "7d"
+        }
+    )
+}
+
+
+const User = model("User",userSchema);
 export default User;
