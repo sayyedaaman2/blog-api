@@ -1,10 +1,8 @@
 import express from "express";
-import { adminAndOwnerAccess,authorOrAdminOnly,protectedRoute } from "../middlewares/auth.middleware.js";
-import { loadResource } from "../middlewares/loadResource.js";
 import authRoutes from "./auth.route.js";
-import Post from "../models/post.model.js";
-import Comment from "../models/comment.model.js";
-
+import { postCreateValidationSchema, postUpdateValidationSchema } from "../schema/post.schema.js";
+import Validate from "../middlewares/validate.js";
+import {loadResource} from '../middlewares/loadResource.js'
 import {
   createPost,
   fetchPost,
@@ -18,6 +16,10 @@ import {
   deleteComment,
   fetchComments,
 } from "../controllers/comment.controller.js";
+import { adminAndOwnerAccess, authorOrAdminOnly, protectedRoute } from "../middlewares/auth.middleware.js";
+import Post from "../models/post.model.js";
+import { commentCreateValidationSchema } from "../schema/comment.schema.js";
+import Comment from "../models/comment.model.js";
 
 const router = express.Router();
 
@@ -31,23 +33,28 @@ router.use("/auth", authRoutes);
 
 // Public
 router.get("/posts", fetchPost);
-router.get("/posts/:postId", fetchPostById);
+router.get("/posts/:id", fetchPostById);
 
 // Protected + admin/owner
-router.post("/posts", protectedRoute,authorOrAdminOnly, createPost);
+router.post("/posts",
+  Validate(postCreateValidationSchema),
+  protectedRoute,
+  authorOrAdminOnly,
+  createPost);
 
 router.patch(
-  "/posts/:postId",
+  "/posts/:id",
+  Validate(postUpdateValidationSchema),
   protectedRoute,
-  loadResource(Post, "postId"),
+  loadResource(Post, "id"),
   adminAndOwnerAccess,
   updatePost
 );
 
 router.delete(
-  "/posts/:postId",
+  "/posts/:id",
   protectedRoute,
-  loadResource(Post, "postId"),
+  loadResource(Post, "id"),
   adminAndOwnerAccess,
   deletePost
 );
@@ -55,19 +62,18 @@ router.delete(
 // ============= COMMENTS =============
 
 // Public
-router.get("/posts/:postId/comments", fetchComments);
+router.get("/posts/:id/comments", fetchComments);
 
 // Protected
-router.post(
-  "/posts/:postId/comments",
+router.post("/posts/:id/comments",
+  Validate(commentCreateValidationSchema),
   protectedRoute,
-  createComment
-);
+   createComment);
 
 router.delete(
-  "/posts/:postId/comments/:commentId",
+  "/posts/:id/comments/:commentId",
   protectedRoute,
-  loadResource(Comment, "commentId"),
+  loadResource(Comment,"commentId"),
   adminAndOwnerAccess,
   deleteComment
 );

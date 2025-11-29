@@ -5,8 +5,7 @@ export const loadResource = (Model, idParams="id")=>{
     return async (req,res,next)=>{
         try{
             const rosourceId = req.params[idParams];
-
-            if(rosourceId){
+            if(!rosourceId){
                 return res.status(400).send({
                     success :  false,
                     message : `Missing params : ${idParams}`,

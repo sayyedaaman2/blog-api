@@ -1,8 +1,11 @@
 import Post from "../models/post.model.js";
 export const createPost = async (req, res, next) => {
   try {
-    const createdPost = await Post.create(req.body);
-
+    const post = {
+      ...req.body,
+      author : req.user._id
+    }
+    const createdPost = await Post.create(post);
     res.status(201).send({
       success: true,
       message: "Post created successfully",
@@ -17,7 +20,8 @@ export const updatePost = async (req, res, next) => {
   try {
     const postId = req.params.id;
     const updateData = req.body;
-    const updatedPost = await Post.findBYIdAndUpdate(
+    console.log(postId, updateData)
+    const updatedPost = await Post.findByIdAndUpdate(
       postId,
       {
         $set: updateData,
@@ -67,7 +71,7 @@ export const fetchPost = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     // 2) Build filter object
-    const filter = {};
+    const filter = {published : true};
 
     // Search in title or content
     if (search && typeof search === "string" && search.trim().length > 0) {

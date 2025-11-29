@@ -2,7 +2,12 @@ import Comment from "../models/comment.model.js";
 
 export const createComment = async (req, res, next) => {
   try {
-    const createdComment = await Comment.create(req.body);
+    const commentBody = {
+      ...req.body, 
+      author : req.user._id,
+      post : req.params.id
+    }
+    const createdComment = await Comment.create(commentBody);
     return res.status(201).send({
       success: true,
       message: "Comment created successfully",
@@ -46,7 +51,7 @@ export const deleteComment = async (req, res, next) => {
 
 export const fetchComments = async (req, res, next) => {
   try {
-    const postId = req.params.postId;
+    const postId = req.params.id;
      const commentList = await Comment.find({ post: postId })
       .sort({ createdAt: -1 });
     return res.status(200).send({
